@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Detective - เกมทายคำศัพท์ภาษาอังกฤษ ป.3</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Fredoka & Mali for Kid-Friendly Look -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Mali:wght@500;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        pastelMint: '#E8F5E9',
+                        pastelMintDark: '#A5D6A7',
+                        pastelBlue: '#E3F2FD',
+                        pastelBlueDark: '#90CAF9',
+                        pastelYellow: '#FFFDE7',
+                        pastelOrange: '#FFE0B2',
+                        pastelPink: '#FCE4EC',
+                        pastelPurple: '#F3E5F5',
+                        brandGreen: '#4CAF50',
+                        brandBlue: '#2196F3',
+                    },
+                    fontFamily: {
+                        sans: ['Fredoka', 'Mali', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Fredoka', 'Mali', sans-serif;
+            background-color: #F4F9F4;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        
+        /* Smooth bounce animation for letters */
+        @keyframes bounce-subtle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+        .animate-bounce-subtle {
+            animation: bounce-subtle 2s infinite ease-in-out;
+        }
+
+        /* Pulse highlight for missing letters */
+        @keyframes slot-pulse {
+            0%, 100% { border-color: #90CAF9; background-color: #FFFFFF; }
+            50% { border-color: #42A5F5; background-color: #E3F2FD; }
+        }
+        .active-slot {
+            animation: slot-pulse 1.5s infinite;
+        }
+
+        /* Custom shadow styles for child-friendly 3D feel */
+        .btn-3d {
+            transition: all 0.1s ease;
+            box-shadow: 0 6px 0 rgba(0, 0, 0, 0.15);
+        }
+        .btn-3d:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 rgba(0, 0, 0, 0.15);
+        }
+
+        /* Modal backdrop effect */
+        .backdrop-blur-custom {
+            backdrop-filter: blur(8px);
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-700 flex flex-col justify-between overflow-x-hidden">
+
+    <!-- Header Navigation Bar -->
+    <header class="w-full bg-white/80 backdrop-blur border-b border-emerald-100 py-3 px-4 sm:px-8 flex justify-between items-center sticky top-0 z-20">
+        <div class="flex items-center space-x-3 cursor-pointer" onclick="showScreen('welcome-screen')">
+            <div class="w-10 h-10 rounded-2xl bg-emerald-400 text-white flex items-center justify-center font-bold text-xl shadow-md">
+                <i class="fa-solid fa-spell-check"></i>
+            </div>
+            <div>
+                <h1 class="text-xl sm:text-2xl font-bold text-emerald-700 tracking-wide leading-none">Word Detective</h1>
+                <p class="text-xs text-slate-400 font-medium">ทายคำศัพท์ภาษาอังกฤษ ป.3</p>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-2">
+            <!-- Audio Toggle Button -->
+            <button id="sound-toggle-btn" onclick="toggleSound()" class="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition" title="เปิด/ปิด เสียง">
+                <i id="sound-icon" class="fa-solid fa-volume-high text-lg"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow flex items-center justify-center p-4">
+        
+        <!-- ==================== 1. WELCOME / CATEGORY SCREEN ==================== -->
+        <section id="welcome-screen" class="w-full max-w-2xl bg-white rounded-3xl p-6 sm:p-10 shadow-xl border-4 border-emerald-100 text-center space-y-8 relative overflow-hidden transition-all duration-300">
+            <!-- Background Decorative Bubbles -->
+            <div class="absolute -top-10 -left-10 w-32 h-32 bg-emerald-100 rounded-full opacity-50 blur-xl"></div>
+            <div class="absolute -bottom-10 -right-10 w-40 h-40 bg-sky-100 rounded-full opacity-50 blur-xl"></div>
+
+            <div class="space-y-3 relative z-10">
+                <span class="inline-block px-4 py-1.5 bg-emerald-100 text-emerald-800 rounded-full text-sm font-semibold tracking-wide">
+                    🎮 เรียนรู้ภาษาอังกฤษผ่านเกม
+                </span>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-800 leading-tight">
+                    เติมตัวอักษรที่หายไป <br><span class="text-emerald-500">ให้สมบูรณ์!</span>
+                </h2>
+                <p class="text-slate-500 text-base sm:text-lg max-w-md mx-auto">
+                    มีเวลาข้อละ <span class="font-bold text-amber-500">20 วินาที</span> ตอบถูกได้ <span class="font-bold text-emerald-500">1 คะแนน</span> พร้อมภาพประกอบสุดน่ารัก!
+                </p>
+            </div>
+
+            <!-- Category Selection -->
+            <div class="space-y-4 relative z-10">
+                <h3 class="text-lg font-bold text-slate-700">เลือกหมวดหมู่คำศัพท์ที่ต้องการเล่น:</h3>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+                    
+                    <button onclick="startGame('animals')" class="btn-3d bg-emerald-100 hover:bg-emerald-200 border-2 border-emerald-300 rounded-2xl p-4 flex flex-col items-center justify-center group transition">
+                        <span class="text-4xl group-hover:scale-110 transition transform">🐶</span>
+                        <span class="mt-2 font-bold text-slate-700 text-sm sm:text-base">สัตว์น่ารัก</span>
+                        <span class="text-xs text-slate-500">Animals</span>
+                    </button>
+
+                    <button onclick="startGame('fruits')" class="btn-3d bg-amber-100 hover:bg-amber-200 border-2 border-amber-300 rounded-2xl p-4 flex flex-col items-center justify-center group transition">
+                        <span class="text-4xl group-hover:scale-110 transition transform">🍎</span>
+                        <span class="mt-2 font-bold text-slate-700 text-sm sm:text-base">ผลไม้สดชื่น</span>
+                        <span class="text-xs text-slate-500">Fruits</span>
+                    </button>
+
+                    <button onclick="startGame('colors')" class="btn-3d bg-purple-100 hover:bg-purple-200 border-2 border-purple-300 rounded-2xl p-4 flex flex-col items-center justify-center group transition">
+                        <span class="text-4xl group-hover:scale-110 transition transform">🎨</span>
+                        <span class="mt-2 font-bold text-slate-700 text-sm sm:text-base">สีสันสดใส</span>
+                        <span class="text-xs text-slate-500">Colors</span>
+                    </button>
+
+                    <button onclick="startGame('objects')" class="btn-3d bg-sky-100 hover:bg-sky-200 border-2 border-sky-300 rounded-2xl p-4 flex flex-col items-center justify-center group transition">
+                        <span class="text-4xl group-hover:scale-110 transition transform">✏️</span>
+                        <span class="mt-2 font-bold text-slate-700 text-sm sm:text-base">ของใช้รอบตัว</span>
+                        <span class="text-xs text-slate-500">Objects</span>
+                    </button>
+
+                </div>
+            </div>
+
+            <!-- Start All Button -->
+            <div class="pt-2 relative z-10">
+                <button onclick="startGame('all')" class="btn-3d w-full sm:w-auto px-10 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xl rounded-2xl border-b-4 border-emerald-700 transition">
+                    <i class="fa-solid fa-play mr-2"></i> เล่นรวมทุกหมวดหมู่!
+                </button>
+            </div>
+        </section>
+
+
+        <!-- ==================== 2. GAMEPLAY SCREEN ==================== -->
+        <section id="game-screen" class="hidden w-full max-w-2xl bg-white rounded-3xl p-5 sm:p-8 shadow-xl border-4 border-sky-100 flex-col space-y-6 relative">
+            
+            <!-- Top Game Info Bar (Score, Round, Timer) -->
+            <div class="flex items-center justify-between bg-slate-50 rounded-2xl p-3 border border-slate-200">
+                <!-- Score Counter -->
+                <div class="flex items-center space-x-2">
+                    <div class="w-10 h-10 rounded-xl bg-amber-400 text-white flex items-center justify-center font-bold text-xl shadow">
+                        ⭐
+                    </div>
+                    <div>
+                        <span class="text-xs text-slate-400 font-bold uppercase block">คะแนน</span>
+                        <span id="score-display" class="text-xl font-extrabold text-amber-600">0</span>
+                    </div>
+                </div>
+
+                <!-- Word Counter -->
+                <div class="text-center">
+                    <span class="text-xs text-slate-400 font-bold uppercase block">ข้อที่</span>
+                    <span id="question-number" class="text-lg font-bold text-slate-700">1 / 10</span>
+                </div>
+
+                <!-- Timer -->
+                <div class="flex items-center space-x-2">
+                    <div class="text-right">
+                        <span class="text-xs text-slate-400 font-bold uppercase block">เวลา</span>
+                        <span id="timer-display" class="text-xl font-extrabold text-rose-500">20s</span>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-rose-100 text-rose-500 flex items-center justify-center font-bold text-xl">
+                        ⏱️
+                    </div>
+                </div>
+            </div>
+
+            <!-- Time Progress Bar -->
+            <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden border border-slate-200">
+                <div id="timer-bar" class="bg-rose-500 h-full w-full transition-all duration-1000 linear"></div>
+            </div>
+
+            <!-- Word Display & Pronunciation Button -->
+            <div class="bg-sky-50/70 border-2 border-sky-200 rounded-3xl p-6 sm:p-8 text-center space-y-6 relative">
+                
+                <!-- Hint / Audio Playback Button -->
+                <div class="flex justify-center items-center space-x-3">
+                    <button onclick="speakCurrentWord()" class="btn-3d px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white text-sm font-bold rounded-xl flex items-center space-x-2 transition">
+                        <i class="fa-solid fa-volume-high text-base"></i>
+                        <span>ฟังเสียงอ่าน</span>
+                    </button>
+                    <button onclick="giveHint()" class="btn-3d px-4 py-2 bg-amber-400 hover:bg-amber-500 text-slate-800 text-sm font-bold rounded-xl flex items-center space-x-2 transition">
+                        <i class="fa-regular fa-lightbulb text-base"></i>
+                        <span>คำใบ้ (ไทย)</span>
+                    </button>
+                </div>
+
+                <!-- Thai Meaning Hint Box (Initially Hidden or Toggled) -->
+                <div id="hint-text-box" class="hidden text-slate-600 font-bold bg-amber-100/80 border border-amber-300 py-2 px-4 rounded-xl text-center text-sm inline-block">
+                    คำแปล: <span id="hint-text" class="text-amber-800"></span>
+                </div>
+
+                <!-- Word Letters Slot Container -->
+                <div id="word-slots-container" class="flex flex-wrap justify-center items-center gap-2 sm:gap-3 py-4">
+                    <!-- Letter boxes dynamically generated here -->
+                </div>
+            </div>
+
+            <!-- On-Screen Virtual Keyboard for Easy Touch Operation -->
+            <div class="space-y-2">
+                <p class="text-center text-xs text-slate-400 font-semibold">แตะตัวอักษรเพื่อตอบ (หรือพิมพ์ด้วยคีย์บอร์ด)</p>
+                <div id="keyboard-container" class="flex flex-col gap-1.5 max-w-lg mx-auto">
+                    <!-- Keyboard rows generated dynamically JS -->
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ==================== 3. SUCCESS / REVEAL MODAL ==================== -->
+        <div id="reveal-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-custom z-50 hidden flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full text-center space-y-6 shadow-2xl border-4 border-emerald-200 transform transition-all animate-bounce-subtle">
+                
+                <div class="space-y-2">
+                    <span id="reveal-badge" class="px-4 py-1 bg-emerald-100 text-emerald-700 font-bold text-sm rounded-full inline-block">
+                        ✨ ถูกต้องครับ! (Correct!)
+                    </span>
+                    <h3 id="reveal-word" class="text-4xl font-extrabold text-slate-800 tracking-wider">APPLE</h3>
+                    <p id="reveal-meaning" class="text-slate-500 text-base font-semibold">แอปเปิ้ล</p>
+                </div>
+
+                <!-- Picture Display Box -->
+                <div class="relative w-full h-48 bg-emerald-50 rounded-2xl overflow-hidden border-2 border-emerald-100 flex items-center justify-center">
+                    <img id="reveal-image" src="" alt="Word Illustration" class="w-full h-full object-cover hidden" onload="this.classList.remove('hidden')">
+                    <!-- Emoji Backup / Fallback Icon -->
+                    <span id="reveal-emoji" class="text-8xl">🍎</span>
+                </div>
+
+                <!-- Next Button -->
+                <button onclick="nextQuestion()" class="btn-3d w-full py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xl rounded-2xl border-b-4 border-emerald-700 transition">
+                    ข้อถัดไป <i class="fa-solid fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </div>
+
+
+        <!-- ==================== 4. GAME OVER / RESULT SCREEN ==================== -->
+        <section id="result-screen" class="hidden w-full max-w-lg bg-white rounded-3xl p-6 sm:p-10 shadow-xl border-4 border-emerald-100 text-center space-y-6">
+            <div class="text-6xl animate-bounce">🏆</div>
+            
+            <div class="space-y-2">
+                <h2 class="text-3xl font-extrabold text-slate-800">จบเกมแล้วจ้า!</h2>
+                <p class="text-slate-500 text-sm">เก่งมาก! มาดูสรุปคะแนนของคุณกันเลย</p>
+            </div>
+
+            <!-- Final Score Card -->
+            <div class="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-6 space-y-3">
+                <span class="text-xs text-emerald-600 font-bold uppercase tracking-wider">คะแนนรวมทั้งหมด</span>
+                <div class="text-5xl font-extrabold text-emerald-600">
+                    <span id="final-score">0</span> <span class="text-xl font-bold text-slate-400">/ <span id="final-total">10</span></span>
+                </div>
+                <p id="final-message" class="text-slate-600 font-medium text-sm pt-2">
+                    ยอดเยี่ยมมากครับเด็กๆ!
+                </p>
+            </div>
+
+            <!-- Control Buttons -->
+            <div class="flex flex-col sm:flex-row gap-3 pt-2">
+                <button onclick="restartGame()" class="btn-3d flex-1 py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl transition">
+                    <i class="fa-solid fa-rotate-right mr-1"></i> เล่นอีกครั้ง
+                </button>
+                <button onclick="showScreen('welcome-screen')" class="btn-3d flex-1 py-3.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl transition">
+                    <i class="fa-solid fa-house mr-1"></i> หน้าหลัก
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Canvas for Confetti Effects -->
+    <canvas id="confetti-canvas" class="fixed inset-0 pointer-events-none z-50"></canvas>
+
+    <!-- Footer -->
+    <footer class="w-full text-center py-3 text-xs text-slate-400">
+        สื่อการเรียนรู้ภาษาอังกฤษ ป.3 • พัฒนาเพื่อการเรียนรู้อย่างสนุกสนาน
+    </footer>
+
+    <!-- Game Logic & Functionalities Script -->
+    <script>
+        /* ==================== VOCABULARY DATABASE (Grade 3 Level) ==================== */
+        const vocabularyData = {
+            animals: [
+                { word: 'CAT', thai: 'แมว', emoji: '🐱', img: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=500&auto=format&fit=crop&q=80' },
+                { word: 'DOG', thai: 'สุนัข', emoji: '🐶', img: 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=500&auto=format&fit=crop&q=80' },
+                { word: 'FISH', thai: 'ปลา', emoji: '🐟', img: 'https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?w=500&auto=format&fit=crop&q=80' },
+                { word: 'BIRD', thai: 'นก', emoji: '🐦', img: 'https://images.unsplash.com/photo-1444464666168-49d633b86797?w=500&auto=format&fit=crop&q=80' },
+                { word: 'DUCK', thai: 'เป็ด', emoji: '🦆', img: 'https://images.unsplash.com/photo-1555852095-64e7428df0fa?w=500&auto=format&fit=crop&q=80' },
+                { word: 'LION', thai: 'สิงโต', emoji: '🦁', img: 'https://images.unsplash.com/photo-1614027164847-1b28cfe1df60?w=500&auto=format&fit=crop&q=80' },
+                { word: 'BEAR', thai: 'หมี', emoji: '🐻', img: 'https://images.unsplash.com/photo-1530595467537-0b5996c41f2d?w=500&auto=format&fit=crop&q=80' },
+                { word: 'FROG', thai: 'กบ', emoji: '🐸', img: 'https://images.unsplash.com/photo-1559253664-ca249d4608c6?w=500&auto=format&fit=crop&q=80' },
+                { word: 'RABBIT', thai: 'กระต่าย', emoji: '🐰', img: 'https://images.unsplash.com/photo-1585110396000-c9ffd4e4b308?w=500&auto=format&fit=crop&q=80' },
+                { word: 'TIGER', thai: 'เสือ', emoji: '🐯', img: 'https://images.unsplash.com/photo-1561731216-c3a4d99437d5?w=500&auto=format&fit=crop&q=80' }
+            ],
+            fruits: [
+                { word: 'APPLE', thai: 'แอปเปิ้ล', emoji: '🍎', img: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=500&auto=format&fit=crop&q=80' },
+                { word: 'BANANA', thai: 'กล้วย', emoji: '🍌', img: 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=500&auto=format&fit=crop&q=80' },
+                { word: 'MANGO', thai: 'มะม่วง', emoji: '🥭', img: 'https://images.unsplash.com/photo-1553279768-865429fa0078?w=500&auto=format&fit=crop&q=80' },
+                { word: 'GRAPE', thai: 'องุ่น', emoji: '🍇', img: 'https://images.unsplash.com/photo-1537640538966-79f369143f8f?w=500&auto=format&fit=crop&q=80' },
+                { word: 'ORANGE', thai: 'ส้ม', emoji: '🍊', img: 'https://images.unsplash.com/photo-1547514701-42782101795e?w=500&auto=format&fit=crop&q=80' },
+                { word: 'MELON', thai: 'เมลอน', emoji: '🍈', img: 'https://images.unsplash.com/photo-1571575173700-afb9492e6a50?w=500&auto=format&fit=crop&q=80' },
+                { word: 'PEACH', thai: 'ลูกพีช', emoji: '🍑', img: 'https://images.unsplash.com/photo-1629828874514-c1e5103f2150?w=500&auto=format&fit=crop&q=80' },
+                { word: 'LEMON', thai: 'มะนาวเหลือง', emoji: '🍋', img: 'https://images.unsplash.com/photo-1534531141161-e4160499e97f?w=500&auto=format&fit=crop&q=80' }
+            ],
+            colors: [
+                { word: 'RED', thai: 'สีแดง', emoji: '🔴', img: 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=500&auto=format&fit=crop&q=80' },
+                { word: 'BLUE', thai: 'สีน้ำเงิน', emoji: '🔵', img: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=500&auto=format&fit=crop&q=80' },
+                { word: 'GREEN', thai: 'สีเขียว', emoji: '🟢', img: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&auto=format&fit=crop&q=80' },
+                { word: 'PINK', thai: 'สีชมพู', emoji: '🩷', img: 'https://images.unsplash.com/photo-1509114397022-ed747cca3f65?w=500&auto=format&fit=crop&q=80' },
+                { word: 'BLACK', thai: 'สีดำ', emoji: '🖤', img: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=500&auto=format&fit=crop&q=80' },
+                { word: 'WHITE', thai: 'สีขาว', emoji: '🤍', img: 'https://images.unsplash.com/photo-1588345921523-c2dcdb7f1dcd?w=500&auto=format&fit=crop&q=80' },
+                { word: 'YELLOW', thai: 'สีเหลือง', emoji: '🟡', img: 'https://images.unsplash.com/photo-1508739773434-c26b3d09e071?w=500&auto=format&fit=crop&q=80' }
+            ],
+            objects: [
+                { word: 'BOOK', thai: 'หนังสือ', emoji: '📖', img: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=500&auto=format&fit=crop&q=80' },
+                { word: 'PEN', thai: 'ปากกา', emoji: '🖊️', img: 'https://images.unsplash.com/photo-1585336261026-8f578272c992?w=500&auto=format&fit=crop&q=80' },
+                { word: 'DESK', thai: 'โต๊ะเรียน', emoji: '🪑', img: 'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=500&auto=format&fit=crop&q=80' },
+                { word: 'BALL', thai: 'ลูกบอล', emoji: '⚽', img: 'https://images.unsplash.com/photo-1614632537190-23e4146777db?w=500&auto=format&fit=crop&q=80' },
+                { word: 'CLOCK', thai: 'นาฬิกา', emoji: '⏰', img: 'https://images.unsplash.com/photo-1563861826100-9cb868fdbe1c?w=500&auto=format&fit=crop&q=80' },
+                { word: 'CHAIR', thai: 'เก้าอี้', emoji: '🪑', img: 'https://images.unsplash.com/photo-1503602642458-232111445657?w=500&auto=format&fit=crop&q=80' },
+                { word: 'RULER', thai: 'ไม้บรรทัด', emoji: '📏', img: 'https://images.unsplash.com/photo-1588072432836-e10032774350?w=500&auto=format&fit=crop&q=80' }
+            ]
+        };
+
+        /* ==================== GAME STATE VARIABLE ==================== */
+        let currentCategory = 'all';
+        let questionList = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let timer = null;
+        let timeLeft = 20;
+        let soundEnabled = true;
+
+        let currentWordObj = null;
+        let wordDisplayState = []; // Array tracking revealed letters and blanks
+        let missingIndices = []; // Indices of missing letters
+        let currentFocusBlankIndex = 0; // Which blank is active
+
+        /* ==================== WEB AUDIO SYNTHESIZER (No external audio files needed) ==================== */
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type) {
+            if (!soundEnabled) return;
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'correct') {
+                // Happy Arpeggio
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, now); // C5
+                osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
+                osc.frequency.setValueAtTime(783.99, now + 0.16); // G5
+                osc.frequency.setValueAtTime(1046.50, now + 0.24); // C6
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+                osc.start(now);
+                osc.stop(now + 0.5);
+            } else if (type === 'wrong') {
+                // Low Buzz
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(180, now);
+                osc.frequency.setValueAtTime(130, now + 0.15);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+                osc.start(now);
+                osc.stop(now + 0.35);
+            } else if (type === 'click') {
+                // Subtle pop
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, now);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+                osc.start(now);
+                osc.stop(now + 0.05);
+            } else if (type === 'win') {
+                // Fanfare
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, now); // C5
+                osc.frequency.setValueAtTime(659.25, now + 0.12); // E5
+                osc.frequency.setValueAtTime(783.99, now + 0.24); // G5
+                osc.frequency.setValueAtTime(1046.50, now + 0.4); // C6
+                gain.gain.setValueAtTime(0.25, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+                osc.start(now);
+                osc.stop(now + 0.8);
+            }
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('sound-icon');
+            if (soundEnabled) {
+                icon.className = 'fa-solid fa-volume-high text-lg';
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark text-lg text-slate-400';
+            }
+        }
+
+        /* ==================== SPEECH SYNTHESIS API (Text to Speech) ==================== */
+        function speakCurrentWord() {
+            if (!currentWordObj) return;
+            window.speechSynthesis.cancel(); // Stop ongoing speech
+            const utterance = new SpeechSynthesisUtterance(currentWordObj.word.toLowerCase());
+            utterance.lang = 'en-US';
+            utterance.rate = 0.85; // Slightly slower for primary kids
+            window.speechSynthesis.speak(utterance);
+        }
+
+        /* ==================== NAVIGATION / UI SCREENS ==================== */
+        function showScreen(screenId) {
+            document.getElementById('welcome-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.add('hidden');
+            document.getElementById('reveal-modal').classList.add('hidden');
+
+            document.getElementById(screenId).classList.remove('hidden');
+            if(screenId === 'game-screen') {
+                document.getElementById(screenId).classList.add('flex');
+            }
+            clearInterval(timer);
+        }
+
+        /* ==================== GAME CONTROLLER ==================== */
+        function startGame(category) {
+            playSound('click');
+            currentCategory = category;
+            score = 0;
+            currentQuestionIndex = 0;
+
+            // Prepare vocabulary list
+            if (category === 'all') {
+                questionList = [
+                    ...vocabularyData.animals,
+                    ...vocabularyData.fruits,
+                    ...vocabularyData.colors,
+                    ...vocabularyData.objects
+                ];
+            } else {
+                questionList = [...vocabularyData[category]];
+            }
+
+            // Shuffle words
+            questionList.sort(() => Math.random() - 0.5);
+            // Select up to 10 words per session
+            questionList = questionList.slice(0, 10);
+
+            showScreen('game-screen');
+            renderVirtualKeyboard();
+            loadQuestion();
+        }
+
+        function restartGame() {
+            startGame(currentCategory);
+        }
+
+        /* ==================== QUESTION SETUP ==================== */
+        function loadQuestion() {
+            if (currentQuestionIndex >= questionList.length) {
+                endGame();
+                return;
+            }
+
+            currentWordObj = questionList[currentQuestionIndex];
+            const word = currentWordObj.word;
+
+            // Hide Thai hint by default
+            document.getElementById('hint-text-box').classList.add('hidden');
+            document.getElementById('hint-text').innerText = currentWordObj.thai;
+
+            // Update Header Status
+            document.getElementById('score-display').innerText = score;
+            document.getElementById('question-number').innerText = `${currentQuestionIndex + 1} / ${questionList.length}`;
+
+            // Determine missing letters (1 for short words, 2 for length > 4)
+            missingIndices = [];
+            const missingCount = word.length > 4 ? 2 : 1;
+            
+            // Pick random indices to hide
+            while (missingIndices.length < missingCount) {
+                const randIndex = Math.floor(Math.random() * word.length);
+                if (!missingIndices.includes(randIndex)) {
+                    missingIndices.push(randIndex);
+                }
+            }
+            missingIndices.sort((a, b) => a - b);
+
+            // Construct Word State
+            wordDisplayState = word.split('').map((letter, index) => {
+                return {
+                    originalLetter: letter,
+                    isMissing: missingIndices.includes(index),
+                    userEntered: missingIndices.includes(index) ? '' : letter
+                };
+            });
+
+            currentFocusBlankIndex = 0; // Focus on first missing blank
+            renderWordSlots();
+
+            // Reset Keyboard buttons
+            resetKeyboardState();
+
+            // Auto read word softly at start
+            setTimeout(() => {
+                speakCurrentWord();
+            }, 300);
+
+            // Reset Timer (20 Seconds per specs)
+            resetTimer();
+        }
+
+        /* Render Interactive Word Boxes */
+        function renderWordSlots() {
+            const container = document.getElementById('word-slots-container');
+            container.innerHTML = '';
+
+            let blankCounter = 0;
+
+            wordDisplayState.forEach((item, index) => {
+                const box = document.createElement('div');
+                
+                if (!item.isMissing) {
+                    // Revealed Fixed Letter
+                    box.className = 'w-12 h-14 sm:w-14 sm:h-16 rounded-2xl bg-white border-2 border-slate-200 shadow-sm flex items-center justify-center font-extrabold text-2xl sm:text-3xl text-slate-700';
+                    box.innerText = item.originalLetter;
+                } else {
+                    // Blank Box to fill
+                    const isFocused = (blankCounter === currentFocusBlankIndex);
+                    box.className = `w-12 h-14 sm:w-14 sm:h-16 rounded-2xl border-4 font-extrabold text-2xl sm:text-3xl flex items-center justify-center cursor-pointer transition ${
+                        isFocused 
+                            ? 'active-slot border-sky-400 text-sky-600 shadow-lg scale-105' 
+                            : 'bg-white border-sky-200 text-slate-700 shadow-sm'
+                    }`;
+
+                    box.innerText = item.userEntered || '_';
+                    
+                    const localBlankIndex = blankCounter;
+                    box.onclick = () => {
+                        playSound('click');
+                        currentFocusBlankIndex = localBlankIndex;
+                        renderWordSlots();
+                    };
+
+                    blankCounter++;
+                }
+                container.appendChild(box);
+            });
+        }
+
+        /* ==================== VIRTUAL KEYBOARD ==================== */
+        function renderVirtualKeyboard() {
+            const container = document.getElementById('keyboard-container');
+            container.innerHTML = '';
+
+            const rows = [
+                ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
+                ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
+                ['Z', 'X', 'C', 'V', 'B', 'N', 'M', '⌫']
+            ];
+
+            rows.forEach(rowLetters => {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'flex justify-center gap-1 sm:gap-1.5';
+
+                rowLetters.forEach(letter => {
+                    const btn = document.createElement('button');
+                    btn.id = `key-${letter}`;
+                    if (letter === '⌫') {
+                        btn.className = 'btn-3d px-3 py-2.5 sm:px-4 sm:py-3 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl text-sm sm:text-base flex-1 max-w-[60px]';
+                        btn.innerHTML = '<i class="fa-solid fa-backspace"></i>';
+                        btn.onclick = () => handleBackspace();
+                    } else {
+                        btn.className = 'btn-3d px-2 py-2.5 sm:px-3.5 sm:py-3 bg-white hover:bg-slate-100 border border-slate-200 text-slate-800 font-bold rounded-xl text-base sm:text-lg flex-1 max-w-[45px] transition';
+                        btn.innerText = letter;
+                        btn.onclick = () => handleInputLetter(letter);
+                    }
+                    rowDiv.appendChild(btn);
+                });
+                container.appendChild(rowDiv);
+            });
+        }
+
+        function resetKeyboardState() {
+            document.querySelectorAll('#keyboard-container button').forEach(btn => {
+                btn.disabled = false;
+                btn.classList.remove('opacity-40', 'pointer-events-none');
+            });
+        }
+
+        /* ==================== USER INPUT HANDLING ==================== */
+        function handleInputLetter(letter) {
+            playSound('click');
+
+            // Find current active blank slot index
+            let targetMissingIndex = missingIndices[currentFocusBlankIndex];
+            if (targetMissingIndex !== undefined) {
+                wordDisplayState[targetMissingIndex].userEntered = letter;
+
+                // Move focus to next missing slot if available
+                if (currentFocusBlankIndex < missingIndices.length - 1) {
+                    currentFocusBlankIndex++;
+                }
+
+                renderWordSlots();
+                checkAnswerSubmission();
+            }
+        }
+
+        function handleBackspace() {
+            playSound('click');
+            let targetMissingIndex = missingIndices[currentFocusBlankIndex];
+            
+            // If current box is empty and not at start, move back
+            if (wordDisplayState[targetMissingIndex].userEntered === '' && currentFocusBlankIndex > 0) {
+                currentFocusBlankIndex--;
+                targetMissingIndex = missingIndices[currentFocusBlankIndex];
+            }
+
+            wordDisplayState[targetMissingIndex].userEntered = '';
+            renderWordSlots();
+        }
+
+        // Keyboard Event Listener (Physical Keyboard support)
+        window.addEventListener('keydown', (e) => {
+            if (document.getElementById('game-screen').classList.contains('hidden')) return;
+            if (!document.getElementById('reveal-modal').classList.contains('hidden')) return;
+
+            const key = e.key.toUpperCase();
+            if (key >= 'A' && key <= 'Z' && key.length === 1) {
+                handleInputLetter(key);
+            } else if (e.key === 'Backspace') {
+                handleBackspace();
+            }
+        });
+
+        /* ==================== ANSWER CHECKING ==================== */
+        function checkAnswerSubmission() {
+            // Check if all blanks filled
+            const allFilled = missingIndices.every(idx => wordDisplayState[idx].userEntered !== '');
+            if (!allFilled) return;
+
+            // Form user word
+            const userWord = wordDisplayState.map(item => item.userEntered).join('');
+            const correctWord = currentWordObj.word;
+
+            if (userWord === correctWord) {
+                // Correct Answer!
+                clearInterval(timer);
+                score += 1;
+                playSound('correct');
+                triggerConfetti();
+                showRevealModal(true);
+            } else {
+                // Wrong Answer!
+                playSound('wrong');
+                // Highlight error shake effect
+                const container = document.getElementById('word-slots-container');
+                container.classList.add('animate-bounce');
+                setTimeout(() => container.classList.remove('animate-bounce'), 500);
+            }
+        }
+
+        function giveHint() {
+            playSound('click');
+            document.getElementById('hint-text-box').classList.remove('hidden');
+        }
+
+        /* ==================== TIMER MANAGEMENT ==================== */
+        function resetTimer() {
+            clearInterval(timer);
+            timeLeft = 20; // 20 Seconds per question
+            updateTimerUI();
+
+            timer = setInterval(() => {
+                timeLeft--;
+                updateTimerUI();
+
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    playSound('wrong');
+                    // Time out -> Reveal answer without adding score
+                    showRevealModal(false);
+                }
+            }, 1000);
+        }
+
+        function updateTimerUI() {
+            document.getElementById('timer-display').innerText = `${timeLeft}s`;
+            const percent = (timeLeft / 20) * 100;
+            const timerBar = document.getElementById('timer-bar');
+            timerBar.style.width = `${percent}%`;
+
+            if (timeLeft <= 5) {
+                timerBar.className = 'bg-red-500 h-full transition-all duration-1000 linear';
+            } else if (timeLeft <= 10) {
+                timerBar.className = 'bg-amber-500 h-full transition-all duration-1000 linear';
+            } else {
+                timerBar.className = 'bg-emerald-500 h-full transition-all duration-1000 linear';
+            }
+        }
+
+        /* ==================== REVEAL MODAL & PICTURE DISPLAY ==================== */
+        function showRevealModal(isCorrect) {
+            const modal = document.getElementById('reveal-modal');
+            const badge = document.getElementById('reveal-badge');
+            const wordEl = document.getElementById('reveal-word');
+            const meaningEl = document.getElementById('reveal-meaning');
+            const imgEl = document.getElementById('reveal-image');
+            const emojiEl = document.getElementById('reveal-emoji');
+
+            wordEl.innerText = currentWordObj.word;
+            meaningEl.innerText = currentWordObj.thai;
+            emojiEl.innerText = currentWordObj.emoji;
+
+            // Load Image with fallback to Emoji
+            imgEl.classList.add('hidden');
+            imgEl.src = currentWordObj.img;
+
+            if (isCorrect) {
+                badge.className = 'px-4 py-1 bg-emerald-100 text-emerald-700 font-bold text-sm rounded-full inline-block';
+                badge.innerText = '✨ ถูกต้องครับ! (+1 คะแนน)';
+            } else {
+                badge.className = 'px-4 py-1 bg-rose-100 text-rose-700 font-bold text-sm rounded-full inline-block';
+                badge.innerText = '⏰ หมดเวลา! เฉลยคำตอบคือ';
+            }
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            // Read correct word automatically on reveal
+            setTimeout(() => {
+                speakCurrentWord();
+            }, 200);
+        }
+
+        function nextQuestion() {
+            playSound('click');
+            document.getElementById('reveal-modal').classList.add('hidden');
+            currentQuestionIndex++;
+            loadQuestion();
+        }
+
+        /* ==================== GAME OVER SCREEN ==================== */
+        function endGame() {
+            playSound('win');
+            triggerConfetti();
+
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('final-total').innerText = questionList.length;
+
+            const msgEl = document.getElementById('final-message');
+            const percentage = (score / questionList.length) * 100;
+
+            if (percentage === 100) {
+                msgEl.innerText = '🌟 สุดยอดเลย! คุณได้คะแนนเต็ม 100%';
+            } else if (percentage >= 70) {
+                msgEl.innerText = '👏 เก่งมากเลยครับ! ฝึกฝนบ่อยๆ จะเก่งยิ่งขึ้น!';
+            } else {
+                msgEl.innerText = '✌️ ไม่เป็นไรนะ ลองเล่นใหม่อีกรอบสู้ๆ ครับ!';
+            }
+
+            showScreen('result-screen');
+        }
+
+        /* ==================== CONFETTI CELEBRATION EFFECT ==================== */
+        function triggerConfetti() {
+            const canvas = document.getElementById('confetti-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const pieces = [];
+            const colors = ['#A5D6A7', '#90CAF9', '#FFE0B2', '#FCE4EC', '#F3E5F5', '#FFD54F'];
+
+            for (let i = 0; i < 70; i++) {
+                pieces.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    size: Math.random() * 10 + 5,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    speedY: Math.random() * 3 + 2,
+                    speedX: Math.random() * 2 - 1,
+                    rotation: Math.random() * 360
+                });
+            }
+
+            let animationFrame;
+            const render = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                pieces.forEach(p => {
+                    p.y += p.speedY;
+                    p.x += p.speedX;
+                    p.rotation += 2;
+
+                    ctx.save();
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate((p.rotation * Math.PI) / 180);
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+                    ctx.restore();
+                });
+
+                if (pieces.some(p => p.y < canvas.height)) {
+                    animationFrame = requestAnimationFrame(render);
+                } else {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                }
+            };
+            render();
+        }
+
+        // Resize Canvas on Window Resize
+        window.addEventListener('resize', () => {
+            const canvas = document.getElementById('confetti-canvas');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>
